@@ -41,9 +41,3 @@ plt.title("Clopped image")
 plt.imshow(img_clopped, cmap="gray")
 plt.tight_layout()
 plt.show()
-
-
-# Define model
-# model = network.RaoBallard1999Model()
-
-# Simulation
