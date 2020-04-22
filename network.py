@@ -3,7 +3,7 @@
 import numpy as np
 
 class RaoBallard1999Model:
-    def __init__(self, dt=1, sigma2=1, sigma2_td=10):
+    def __init__(self, dt=1e-2, sigma2=1, sigma2_td=10):
         self.dt = dt
         self.inv_sigma2 = 1/sigma2 # 1 / sigma^2        
         self.inv_sigma2_td = 1/sigma2_td # 1 / sigma_td^2
@@ -26,8 +26,8 @@ class RaoBallard1999Model:
         self.Uh = np.random.randn(int(self.num_level1*self.num_units_level1),
                                   self.num_units_level2)
         
-        self.U = (self.U - 0.5) * 7 
-        self.Uh = (self.Uh - 0.5) * 7 
+        self.U = (self.U - 0.5)
+        self.Uh = (self.Uh - 0.5)
         
         
         self.r = np.zeros((self.num_level1, self.num_units_level1))
