@@ -31,12 +31,12 @@ class RaoBallard1999Model:
                                  self.num_units_level1)
         self.Uh = np.random.randn(int(self.num_level1*self.num_units_level1),
                                   self.num_units_level2)
-        self.r = np.random.rand(self.num_level1, self.num_units_level1)
-        self.rh = np.random.rand(self.num_units_level2)
+        self.r = np.zeros((self.num_level1, self.num_units_level1))
+        self.rh = np.zeros((self.num_units_level2))
     
     def initialize_states(self):
-        self.r = np.random.rand(self.num_level1, self.num_units_level1)
-        self.rh = np.random.rand(self.num_units_level2)
+        self.r = np.zeros((self.num_level1, self.num_units_level1))
+        self.rh = np.zeros((self.num_units_level2))
         
     def __call__(self, inputs, training=True):
         # inputs : (3, 256)
@@ -72,7 +72,7 @@ class RaoBallard1999Model:
         self.rh += self.k1 * drh * self.dt
         self.U += self.k2 * dU * self.dt
         self.Uh += self.k2 * dUh * self.dt
-        return error
+        return error, self.r
             
             
             
