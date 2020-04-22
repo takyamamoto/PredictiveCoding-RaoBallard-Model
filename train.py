@@ -3,7 +3,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import network2
+import network
 from tqdm import tqdm
 
 # Preprocess of inputs
@@ -22,7 +22,7 @@ for i in range(num_images):
 
 
 # Define model
-model = network2.RaoBallard1999Model()
+model = network.RaoBallard1999Model()
 
 # Get image from imglist
 error_list = []
