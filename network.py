@@ -4,12 +4,6 @@ import numpy as np
 
 class RaoBallard1999Model:
     def __init__(self, dt=1e-3, sigma2=1, sigma2_td=10):
-        """
-        Current-based Leaky integrate-and-fire model.
-        
-        Args:
-            N (int)       : Number of neurons.
-        """
         self.dt = dt
         self.inv_sigma2 = 1/sigma2 # 1 / sigma^2        
         self.inv_sigma2_td = 1/sigma2_td # 1 / sigma_td^2
