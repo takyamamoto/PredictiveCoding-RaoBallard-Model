@@ -17,14 +17,18 @@ class RaoBallard1999Model:
         
         self.num_units_level0 = 256
         self.num_units_level1 = 32
-        self.num_units_level2 = 64
+        self.num_units_level2 = 128
         self.num_level1 = 3
         
-        self.U = np.random.randn(self.num_level1,
-                                 self.num_units_level0, 
-                                 self.num_units_level1)
-        self.Uh = np.random.randn(int(self.num_level1*self.num_units_level1),
+        self.U = np.random.rand(self.num_level1,
+                                self.num_units_level0, 
+                                self.num_units_level1)
+        self.Uh = np.random.rand(int(self.num_level1*self.num_units_level1),
                                   self.num_units_level2)
+        
+        self.U = (self.U - 0.5) * 7 
+        self.Uh = (self.Uh - 0.5) * 7 
+        
         self.r = np.zeros((self.num_level1, self.num_units_level1))
         self.rh = np.zeros((self.num_units_level2))
     
