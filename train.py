@@ -3,7 +3,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import network
+import network2
 from tqdm import tqdm
 
 # Preprocess of inputs
@@ -43,11 +43,12 @@ for i in range(num_images):
         inputs = np.array([img_clopped[:, 0:16].flatten(), 
                            img_clopped[:, 5:21].flatten(), 
                            img_clopped[:, 10:26].flatten()])
-
+        
+        # Reset states
         model.initialize_states()
         rtm1 = 0
         
-        # Show image until r will be converged 
+        # Input an image patch until latent variables are converged 
         while True:
             error, r = model(inputs)
             diffr = np.mean(np.abs(r - rtm1))
@@ -57,7 +58,8 @@ for i in range(num_images):
                 break
         
         error_list.append(np.mean(error**2))
-        
+            
+        # Decay learning rate         
         if j % 40 == 0:
             model.k2 *= 0.985
         
