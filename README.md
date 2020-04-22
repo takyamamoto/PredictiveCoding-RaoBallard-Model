@@ -1,1 +1,1 @@
-# PredictiveCoding-RaoBallard-Model
+# Predictive Coding (Rao & Ballard 1999) Model
