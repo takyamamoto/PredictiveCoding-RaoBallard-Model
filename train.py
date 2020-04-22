@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 # Preprocess of inputs
 num_images = 10
-num_sampling = 200
+num_sampling = 450
 num_iter = num_images * num_sampling
 
 imgdirpath = "./images_preprocessed/"
@@ -16,7 +16,7 @@ imglist = []
 for i in range(num_images):    
     filepath = imgdirpath + "{0:03d}.jpg".format(i + 1)
     img_loaded = cv2.imread(filepath)[:, :, 0].astype(np.float32)
-    img_loaded /= 256
+    img_loaded /= 255
     img_loaded = (img_loaded - np.mean(img_loaded)) / np.std(img_loaded)
     imglist.append(img_loaded)
 
@@ -44,8 +44,17 @@ for i in range(num_images):
                            img_clopped[:, 5:21].flatten(), 
                            img_clopped[:, 10:26].flatten()])
 
-        for _ in range(2000):    
-            error = model(inputs)
+        model.initialize_states()
+        rtm1 = 0
+        
+        # Show image until r will be converged 
+        while True:
+            error, r = model(inputs)
+            diffr = np.mean(np.abs(r - rtm1))
+            rtm1 = r.copy()
+
+            if diffr < 1e-5:
+                break
         
         error_list.append(np.mean(error**2))
         
@@ -54,8 +63,10 @@ for i in range(num_images):
         
         pbar.update(1)
 
+# Plot results
 plt.figure()
 plt.plot(np.arange(num_iter), np.array(error_list)) 
+plt.savefig("error.png")
 plt.show()
 
 plt.figure(figsize=(10, 5))
@@ -65,4 +76,5 @@ for i in range(32):
     plt.xticks([])
     plt.yticks([])
 plt.tight_layout()
+plt.savefig("RF.png")
 plt.show()
