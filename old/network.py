@@ -20,7 +20,8 @@ class RaoBallard1999Model:
         self.num_units_level2 = 128
         self.num_level1 = 3
         
-        self.U = np.random.randn(self.num_units_level0, 
+        self.U = np.random.randn(self.num_level1,
+                                 self.num_units_level0, 
                                  self.num_units_level1)
         self.Uh = np.random.randn(int(self.num_level1*self.num_units_level1),
                                   self.num_units_level2)
@@ -45,7 +46,7 @@ class RaoBallard1999Model:
         # inputs : (3, 256)
         r_reshaped = np.reshape(self.r, (int(self.num_level1*self.num_units_level1))) # (96)
 
-        fx = np.array([self.U @ self.r[i] for i in range(self.num_level1)]) # (3, 256)
+        fx = np.array([self.U[i] @ self.r[i] for i in range(self.num_level1)]) # (3, 256)
         #fx = np.array([np.tanh(self.U[i] @ self.r[i]) for i in range(self.num_level1)]) # (3, 256)
 
         fxh = self.Uh @ self.rh # (96, )
@@ -70,16 +71,21 @@ class RaoBallard1999Model:
             - self.inv_sigma2_td * errorh_reshaped - g_r
         drh = self.inv_sigma2_td * self.Uh.T @ dfxh_errorh - g_rh
         """
-        dr = self.inv_sigma2 * np.array([self.U.T @ error[i] for i in range(self.num_level1)])\
+        dr = self.inv_sigma2 * np.array([self.U[i].T @ error[i] for i in range(self.num_level1)])\
             - self.inv_sigma2_td * errorh_reshaped - g_r
         drh = self.inv_sigma2_td * self.Uh.T @ errorh - g_rh
 
         if training:            
-            dU = self.inv_sigma2 * np.sum(np.array([np.outer(error[i], self.r[i]) for i in range(self.num_level1)]),axis=0)\
+            dU = self.inv_sigma2 * np.array([np.outer(error[i], self.r[i]) for i in range(self.num_level1)])\
                 - self.lam * self.U
             dUh = self.inv_sigma2_td * np.outer(errorh, self.rh)\
                 - self.lam * self.Uh
-
+            """
+            dU = self.inv_sigma2 * np.array([np.outer(dfx_error[i], self.r[i]) for i in range(self.num_level1)])\
+                - self.lam * self.U
+            dUh = self.inv_sigma2_td * np.outer(dfxh_errorh, self.rh)\
+                - self.lam * self.Uh
+            """
         self.r += self.k1 * dr * self.dt
         self.rh += self.k1 * drh * self.dt
 

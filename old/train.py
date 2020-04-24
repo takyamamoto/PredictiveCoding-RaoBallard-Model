@@ -13,16 +13,6 @@ def DoG(img, ksize=(5,5), sigma=1.3, k=1.6):
     dog = g1 - g2
     return (dog - dog.min())/(dog.max()-dog.min())
 
-def gaussian_2D(x, y, sig):
-    return ((1.22)/(2*np.pi*(sig**2))) * np.exp(-(x**2 + y**2)/(2*(sig**2)))
-
-def Gauss2Dwindow(sigma=10):
-    num = 16; x = np.arange(-(num-1)/2, (num+1)/2, 1); g_window = np.zeros((x.shape[0],x.shape[0]))
-    for i in range(x.shape[0]):
-        for j in range(x.shape[0]):
-            g_window[i, j] = gaussian_2D(x[i], x[j], sigma)
-    return g_window
-
 # Preprocess of inputs
 num_images = 10
 #num_sampling = 
@@ -31,13 +21,12 @@ num_iter = 10000
 
 imgdirpath = "./images_preprocessed/"
 imglist = []
-gauss = Gauss2Dwindow()
 for i in range(num_images):    
     filepath = imgdirpath + "{0:03d}.jpg".format(i + 1)
     img_loaded = cv2.imread(filepath)[:, :, 0].astype(np.float32)
-    img_loaded /= 255
+    #img_loaded /= 255
     img_loaded = DoG(img_loaded)
-    #img_loaded = cv2.GaussianBlur(img_loaded, (5,5), 1.3)
+    img_loaded = cv2.GaussianBlur(img_loaded, (5,5), 1.3)
     #img_loaded = (img_loaded - np.mean(img_loaded)) / np.std(img_loaded)
     imglist.append(img_loaded)
 
@@ -66,14 +55,13 @@ for j in tqdm(range(num_iter)):
     inputs = np.array([img_clopped[:, 0:16].flatten(), 
                        img_clopped[:, 5:21].flatten(), 
                        img_clopped[:, 10:26].flatten()])
-    inputs = (inputs - np.mean(inputs)) / np.std(inputs) * 0.05
     
     # Reset states
     model.initialize_states()
     #rtm1 = 0
     
     # Input an image patch until latent variables are converged 
-    for _ in range(50):
+    for _ in range(15):
         error, errorh, r = model(inputs)
 
     """
@@ -106,7 +94,7 @@ plt.show()
 plt.figure(figsize=(10, 5))
 for i in range(32):
     plt.subplot(4, 8, i+1)
-    plt.imshow(np.reshape(model.U[:, i], (16, 16)), cmap="gray")
+    plt.imshow(np.reshape(model.U[0, :, i], (16, 16)), cmap="gray")
     plt.xticks([])
     plt.yticks([])
 plt.tight_layout()
