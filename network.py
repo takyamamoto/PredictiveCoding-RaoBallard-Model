@@ -3,7 +3,7 @@
 import numpy as np
 
 class RaoBallard1999Model:
-    def __init__(self, dt=5e-3, sigma2=1, sigma2_td=10):
+    def __init__(self, dt=1e-2, sigma2=1, sigma2_td=10):
         self.dt = dt
         self.inv_sigma2 = 1/sigma2 # 1 / sigma^2        
         self.inv_sigma2_td = 1/sigma2_td # 1 / sigma_td^2
