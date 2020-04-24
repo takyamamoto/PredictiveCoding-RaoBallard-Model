@@ -53,7 +53,7 @@ for j in tqdm(range(num_iter)):
     #rtm1 = 0
     
     # Input an image patch until latent variables are converged 
-    for _ in range(20):
+    for _ in range(15):
         error, errorh, r = model(inputs)
 
     """
