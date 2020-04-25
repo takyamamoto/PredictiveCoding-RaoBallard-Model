@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class RaoBallard1999Model:
     def __init__(self, dt=1e-2, sigma2=1, sigma2_td=10):
         self.dt = dt
@@ -20,12 +21,12 @@ class RaoBallard1999Model:
         self.num_units_level2 = 128
         self.num_level1 = 3
         
-        self.U = np.random.randn(self.num_units_level0, 
-                                 self.num_units_level1)
-        self.Uh = np.random.randn(int(self.num_level1*self.num_units_level1),
-                                  self.num_units_level2)
-        self.U = self.U * np.sqrt(2/(self.num_units_level0+self.num_units_level1))
-        self.Uh = self.Uh * np.sqrt(2/(int(self.num_level1*self.num_units_level1)+self.num_units_level2)) 
+        U = np.random.randn(self.num_units_level0, 
+                            self.num_units_level1)
+        Uh = np.random.randn(int(self.num_level1*self.num_units_level1),
+                             self.num_units_level2)
+        self.U = U.astype(np.float32) * np.sqrt(2/(self.num_units_level0+self.num_units_level1))
+        self.Uh = Uh.astype(np.float32) * np.sqrt(2/(int(self.num_level1*self.num_units_level1)+self.num_units_level2)) 
         
         
         self.r = np.zeros((self.num_level1, self.num_units_level1))
@@ -46,7 +47,7 @@ class RaoBallard1999Model:
         r_reshaped = np.reshape(self.r, (int(self.num_level1*self.num_units_level1))) # (96)
 
         fx = np.array([self.U @ self.r[i] for i in range(self.num_level1)]) # (3, 256)
-        #fx = np.array([np.tanh(self.U[i] @ self.r[i]) for i in range(self.num_level1)]) # (3, 256)
+        #fx = np.array([np.tanh(self.U @ self.r[i]) for i in range(self.num_level1)]) # (3, 256)
 
         fxh = self.Uh @ self.rh # (96, )
         #fxh = np.tanh(self.Uh @ self.rh) # (96, )
@@ -61,25 +62,33 @@ class RaoBallard1999Model:
         #dfx_error = dfx * error # (3, 256)
         #dfxh_errorh = dfxh * errorh # (96, )
         
-        #g_r = self.alpha * self.r / (1 + self.r**2) # (3, 32)
-        #g_rh = self.alphah * self.rh / (1 + self.rh**2) # (64, )
-        g_r = self.alpha * self.r  # (3, 32)
-        g_rh = self.alphah * self.rh # (64, )
+        g_r = self.alpha * self.r / (1 + self.r**2) # (3, 32)
+        g_rh = self.alphah * self.rh / (1 + self.rh**2) # (64, )
+        #g_r = self.alpha * self.r  # (3, 32)
+        #g_rh = self.alphah * self.rh # (64, )
         """
-        dr = self.inv_sigma2 * np.array([self.U[i].T @ dfx_error[i] for i in range(self.num_level1)])\
+        dr = self.inv_sigma2 * np.array([self.U.T @ dfx_error[i] for i in range(self.num_level1)])\
             - self.inv_sigma2_td * errorh_reshaped - g_r
+        
         drh = self.inv_sigma2_td * self.Uh.T @ dfxh_errorh - g_rh
         """
         dr = self.inv_sigma2 * np.array([self.U.T @ error[i] for i in range(self.num_level1)])\
             - self.inv_sigma2_td * errorh_reshaped - g_r
         drh = self.inv_sigma2_td * self.Uh.T @ errorh - g_rh
-
+        
         if training:            
+            """
+            dU = self.inv_sigma2 * np.sum(np.array([np.outer(dfx_error[i], self.r[i]) for i in range(self.num_level1)]),axis=0)\
+                - self.lam * self.U
+            dUh = self.inv_sigma2_td * np.outer(dfxh_errorh, self.rh)\
+                - self.lam * self.Uh
+            """
             dU = self.inv_sigma2 * np.sum(np.array([np.outer(error[i], self.r[i]) for i in range(self.num_level1)]),axis=0)\
                 - self.lam * self.U
             dUh = self.inv_sigma2_td * np.outer(errorh, self.rh)\
                 - self.lam * self.Uh
 
+        # Updates                
         self.r += self.k1 * dr * self.dt
         self.rh += self.k1 * drh * self.dt
 

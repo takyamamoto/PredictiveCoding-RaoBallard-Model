@@ -51,26 +51,3 @@ plt.title("Clopped image")
 plt.imshow(img_clopped, cmap="gray")
 plt.tight_layout()
 plt.show()
-
-def gaussian_2D(x, y, sig):
-    return ((1.22)/(2*np.pi*(sig**2))) * np.exp(-(x**2 + y**2)/(2*(sig**2)))
-
-def Gauss2Dwindow(sigma=10):
-    num = 16; x = np.arange(-(num-1)/2, (num+1)/2, 1); g_window = np.zeros((x.shape[0],x.shape[0]))
-    for i in range(x.shape[0]):
-        for j in range(x.shape[0]):
-            g_window[i, j] = gaussian_2D(x[i], x[j], sigma)
-    return g_window
-
-gauss = Gauss2Dwindow()
-I0 = gauss*40*(img_clopped[:, 0:16])
-I1 = gauss*40*(img_clopped[:, 5:21])
-I2 = gauss*40*(img_clopped[:, 10:26])
-
-plt.figure()
-plt.subplot(1,2,1)
-plt.imshow(I0)
-plt.subplot(1,2,2)
-
-plt.imshow(img_clopped[:, 0:16])
-plt.show()
