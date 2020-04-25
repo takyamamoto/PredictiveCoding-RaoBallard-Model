@@ -13,15 +13,15 @@ def DoG(img, ksize=(5,5), sigma=1.3, k=1.6):
     dog = g1 - g2
     return (dog - dog.min())/(dog.max()-dog.min())
 
-def gaussian_2D(x, y, sig):
-    return ((1.22)/(2*np.pi*(sig**2))) * np.exp(-(x**2 + y**2)/(2*(sig**2)))
-
-def Gauss2Dwindow(sigma=10):
-    num = 16; x = np.arange(-(num-1)/2, (num+1)/2, 1); g_window = np.zeros((x.shape[0],x.shape[0]))
-    for i in range(x.shape[0]):
-        for j in range(x.shape[0]):
-            g_window[i, j] = gaussian_2D(x[i], x[j], sigma)
-    return g_window
+def GaussianMask(sizex=16, sizey=16, sigma=4.8):
+    x = np.arange(0, sizex, 1, float)
+    y = np.arange(0, sizey, 1, float)
+    x, y = np.meshgrid(x,y)
+    
+    x0 = sizex // 2
+    y0 = sizey // 2
+    mask = np.exp(-((x-x0)**2 + (y-y0)**2) / (2*(sigma**2)))
+    return mask / np.sum(mask)
 
 # Preprocess of inputs
 num_images = 10
@@ -31,7 +31,7 @@ num_iter = 10000
 
 imgdirpath = "./images_preprocessed/"
 imglist = []
-gauss = Gauss2Dwindow()
+
 for i in range(num_images):    
     filepath = imgdirpath + "{0:03d}.jpg".format(i + 1)
     img_loaded = cv2.imread(filepath)[:, :, 0].astype(np.float32)
@@ -50,10 +50,8 @@ error_list = []
 # Simulation
 #pbar = tqdm(total=num_iter)
 H, W = imglist[0].shape
-"""
-for i in range(num_images):
-    img = imglist[i]     
-"""
+
+gmask = GaussianMask()
 for j in tqdm(range(num_iter)):
     i = np.random.randint(0, num_images)
     img = imglist[i]
@@ -63,27 +61,18 @@ for j in tqdm(range(num_iter)):
     img_clopped = img[beginy:beginy+16, beginx:beginx+26]
 
     # Clop three inputs
-    inputs = np.array([img_clopped[:, 0:16].flatten(), 
-                       img_clopped[:, 5:21].flatten(), 
-                       img_clopped[:, 10:26].flatten()])
-    inputs = (inputs - np.mean(inputs)) / np.std(inputs) * 0.05
+    inputs = np.array([(gmask*img_clopped[:, 0:16]).flatten(), 
+                       (gmask*img_clopped[:, 5:21]).flatten(), 
+                       (gmask*img_clopped[:, 10:26]).flatten()])
+    inputs = (inputs - np.mean(inputs)) / np.std(inputs)
     
     # Reset states
     model.initialize_states()
     #rtm1 = 0
     
     # Input an image patch until latent variables are converged 
-    for _ in range(50):
+    for _ in range(30):
         error, errorh, r = model(inputs)
-
-    """
-    while True:
-        error, errorh, r = model(inputs)
-        diffr = np.mean(np.abs(r - rtm1))
-        rtm1 = r.copy()
-        if diffr < 1e-5:
-            break
-    """
 
     total_error = model.calculate_total_error(error, errorh)
     error_list.append(total_error)
