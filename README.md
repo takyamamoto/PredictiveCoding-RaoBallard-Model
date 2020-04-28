@@ -1,12 +1,12 @@
 # Predictive Coding (Rao & Ballard 1999) Model
 
 ## Requirement
-- Python >=3.6
-- numpy, matplotlib, 
-- tqdm
+- `Python >= 3.5`
+- `numpy`, `matplotlib`, `scipy`, `opencv`, `tqdm`
 
 ## Usage
-Run `train.py` or `predictive-coding.ipynb` (written in Japanese).
+- Run `train.py` or `predictive-coding.ipynb` (written in Japanese).
+- `preprocessing.py`, `ica.py`, `input_test.py` are test files.
 
 ## Results
 ### Receptive fields of Level 1 module
