@@ -76,7 +76,7 @@ for iter_ in tqdm(range(num_iter)):
         dr_norm = np.linalg.norm(dr, ord=2) 
         drh_norm = np.linalg.norm(drh, ord=2)
         
-        # Check convergence od r and rh, then update weights
+        # Check convergence of r and rh, then update weights
         if dr_norm < eps and drh_norm < eps:
             error, errorh, dr, drh = model(inputs, training=True)
             break
