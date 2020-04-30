@@ -113,12 +113,12 @@ plt.show()
 
 # Plot Receptive fields of level 1
 fig = plt.figure(figsize=(10, 5))
+plt.subplots_adjust(hspace=0.1, wspace=0.1)
 for i in range(32):
     plt.subplot(4, 8, i+1)
     plt.imshow(np.reshape(model.U[:, i], (16, 16)), cmap="gray")
     plt.axis("off")
 
-plt.tight_layout()
 fig.suptitle("Receptive fields of level 1", fontsize=20)
 plt.subplots_adjust(top=0.9)
 plt.savefig("RF_level1.png")
@@ -133,12 +133,12 @@ U_ = np.concatenate((U1, U2, U3), axis = 1)
 Uh_ = U_ @ model.Uh  
 
 fig = plt.figure(figsize=(10, 5))
+plt.subplots_adjust(hspace=0.1, wspace=0.1)
 for i in range(24):
     plt.subplot(4, 6, i+1)
     plt.imshow(np.reshape(Uh_[:, i], (16, 26), order='F'), cmap="gray")
     plt.axis("off")
 
-plt.tight_layout()
 fig.suptitle("Receptive fields of level 2", fontsize=20)
 plt.subplots_adjust(top=0.9)
 plt.savefig("RF_level2.png")
