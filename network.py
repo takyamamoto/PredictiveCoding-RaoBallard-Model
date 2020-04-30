@@ -32,7 +32,7 @@ class RaoBallard1999Model:
         self.rh = np.zeros((self.num_units_level2))
     
     def initialize_states(self, inputs):
-        self.r = np.array([self.U.T @ inputs[i] for i in range(self.num_level1)])
+        self.r = inputs @ self.U 
         self.rh = self.Uh.T @ np.reshape(self.r, (int(self.num_level1*self.num_units_level1)))
     
     def calculate_total_error(self, error, errorh):
@@ -45,8 +45,8 @@ class RaoBallard1999Model:
         # inputs : (3, 256)
         r_reshaped = np.reshape(self.r, (int(self.num_level1*self.num_units_level1))) # (96)
 
-        fx = np.array([self.U @ self.r[i] for i in range(self.num_level1)]) # (3, 256)
-        #fx = np.array([np.tanh(self.U @ self.r[i]) for i in range(self.num_level1)]) # (3, 256)
+        fx = self.r @ self.U.T        
+        #fx = np.tanh(self.r @ self.U.T) # (3, 256)
 
         fxh = self.Uh @ self.rh # (96, )
         #fxh = np.tanh(self.Uh @ self.rh) # (96, )
@@ -54,6 +54,7 @@ class RaoBallard1999Model:
         #dfx = 1 - fx**2 # (3, 256)
         #dfxh = 1 - fxh**2 # (96,)
         
+        # Calculate errors
         error = inputs - fx # (3, 256)
         errorh = r_reshaped - fxh # (96, ) 
         errorh_reshaped = np.reshape(errorh, (self.num_level1, self.num_units_level1)) # (3, 32)
@@ -65,14 +66,13 @@ class RaoBallard1999Model:
         g_rh = self.alphah * self.rh / (1 + self.rh**2) # (64, )
         #g_r = self.alpha * self.r  # (3, 32)
         #g_rh = self.alphah * self.rh # (64, )
-
-        dr = self.inv_sigma2 * np.array([self.U.T @ error[i] for i in range(self.num_level1)])\
-            - self.inv_sigma2_td * errorh_reshaped - g_r
+        
+        # Update r and rh
+        dr = self.inv_sigma2 * error @ self.U - self.inv_sigma2_td * errorh_reshaped - g_r
         drh = self.inv_sigma2_td * self.Uh.T @ errorh - g_rh
         
         """
-        dr = self.inv_sigma2 * np.array([self.U.T @ dfx_error[i] for i in range(self.num_level1)])\
-            - self.inv_sigma2_td * errorh_reshaped - g_r
+        dr = self.inv_sigma2 * dfx_error @ self.U - self.inv_sigma2_td * errorh_reshaped - g_r
         drh = self.inv_sigma2_td * self.Uh.T @ dfxh_errorh - g_rh
         """
         
@@ -85,20 +85,13 @@ class RaoBallard1999Model:
         
         if training:  
             """
-            dU = self.inv_sigma2 * np.sum(np.array([np.outer(dfx_error[i], self.r[i]) for i in range(self.num_level1)]),axis=0)\
-                - 3*self.lam * self.U
-            dUh = self.inv_sigma2_td * np.outer(dfxh_errorh, self.rh)\
-                - self.lam * self.Uh
+            dU = self.inv_sigma2 * dfx_error.T @ self.r - 3*self.lam * self.U
+            dUh = self.inv_sigma2_td * np.outer(dfxh_errorh, self.rh) - self.lam * self.Uh
             """
-            dU = self.inv_sigma2 * np.sum(np.array([np.outer(error[i], self.r[i]) for i in range(self.num_level1)]), axis=0)\
-                - 3*self.lam * self.U
-            dUh = self.inv_sigma2_td * np.outer(errorh, self.rh)\
-                - self.lam * self.Uh
+            dU = self.inv_sigma2 * error.T @ self.r - 3*self.lam * self.U
+            dUh = self.inv_sigma2_td * np.outer(errorh, self.rh) - self.lam * self.Uh
             
             self.U += self.k2 * dU
             self.Uh += self.k2 * dUh
             
         return error, errorh, dr, drh
-            
-            
-            
