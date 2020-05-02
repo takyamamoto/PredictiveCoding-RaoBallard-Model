@@ -86,8 +86,7 @@ for iter_ in tqdm(range(num_iter)):
             print("Error at patch:", iter_)
             print(dr_norm, drh_norm)
             break
-   
-    
+        
     error_list.append(model.calculate_total_error(error, errorh)) # Append errors
 
     # Decay learning rate         
@@ -98,7 +97,6 @@ for iter_ in tqdm(range(num_iter)):
     if iter_ % 1000 == 999:  
         print("\n iter: "+str(iter_+1)+"/"+str(num_iter)+", Moving error:", np.mean(error_list[iter_-999:iter_]))
         
-# Plot results
 def moving_average(x, n=100) :
     ret = np.cumsum(x, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
@@ -112,7 +110,7 @@ plt.plot(np.arange(len(moving_average_error)), moving_average_error)
 plt.show()
 
 # Plot Receptive fields of level 1
-fig = plt.figure(figsize=(10, 5))
+fig = plt.figure(figsize=(8, 4))
 plt.subplots_adjust(hspace=0.1, wspace=0.1)
 for i in range(32):
     plt.subplot(4, 8, i+1)
@@ -132,10 +130,10 @@ U3 = np.concatenate((zeroPadding, zeroPadding, model.U))
 U_ = np.concatenate((U1, U2, U3), axis = 1)
 Uh_ = U_ @ model.Uh  
 
-fig = plt.figure(figsize=(10, 5))
+fig = plt.figure(figsize=(8, 5))
 plt.subplots_adjust(hspace=0.1, wspace=0.1)
-for i in range(24):
-    plt.subplot(4, 6, i+1)
+for i in range(36):
+    plt.subplot(6, 6, i+1)
     plt.imshow(np.reshape(Uh_[:, i], (16, 26), order='F'), cmap="gray")
     plt.axis("off")
 
